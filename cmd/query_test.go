@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	openai2 "github.com/sashabaranov/go-openai"
 	"github.com/spf13/viper"
 	"strings"
 	"testing"
@@ -13,7 +14,7 @@ func TestCanGetResponse(t *testing.T) {
 	viper.SetEnvPrefix("ducky")
 	viper.AutomaticEnv()
 	apiKey := viper.GetString("DUCKY_API_KEY")
-	resp, err := queryChatGPT(apiKey, prompt)
+	resp, err := queryChatGPT(apiKey, prompt, openai2.GPT3Dot5Turbo)
 
 	if err != nil {
 		t.Errorf("Error getting response from API: %v", err)
