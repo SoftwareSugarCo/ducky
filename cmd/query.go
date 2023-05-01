@@ -69,17 +69,17 @@ var queryCmd = &cobra.Command{
 }
 
 // getModel returns the exact model string for the model provided. If the model is unrecognized or not passed in,
-// the GPT3.5 Turbo model is selected by default.
+// the GPT4 model is selected by default.
 func getModel(model string) string {
 	modelLower := strings.ToLower(model)
 
 	switch modelLower {
-	case "gpt4":
-		return openai.GPT4
+	case "gpt3", "gpt3.5", "gpt3.5turbo":
+		return openai.GPT3Dot5Turbo
 	case "davinci", "gpt3davinci":
 		return openai.GPT3Davinci
 	default:
-		return openai.GPT3Dot5Turbo
+		return openai.GPT4
 	}
 }
 
