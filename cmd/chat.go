@@ -4,7 +4,13 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"bufio"
+	"context"
 	"fmt"
+	"github.com/sashabaranov/go-openai"
+	"github.com/spf13/viper"
+	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -12,15 +18,76 @@ import (
 // chatCmd represents the chat command
 var chatCmd = &cobra.Command{
 	Use:   "chat",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Chat with the OpenAI API",
+	Long:  `This starts a dialogue with Ducky that allows ducky to remember things you tell it during the conversation.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("chat called")
+		// Get the api key
+		apiKey := viper.GetString("api_key")
+		if apiKey == "" {
+			fmt.Println("No API key found. Please set the DUCKY_API_KEY environment variable or add it to your config file.")
+			return
+		}
+
+		// Get the target model
+		model := GetModel(model)
+		fmt.Println("Using model: " + model)
+
+		// Initialize a scanner to read user input.
+		scanner := bufio.NewScanner(os.Stdin)
+
+		// Initialize a slice to store the conversation history.
+		var conversation = []openai.ChatCompletionMessage{
+			{
+				Role:    openai.ChatMessageRoleSystem,
+				Content: "You are helpful coding assistant named ducky; you always explain coding concepts in a way that is easy to understand and you always document your coding examples. You speak in a friendly tone and you are very patient but you don't mind swearing. You are a very good teacher.",
+			},
+		}
+
+		fmt.Println("Ducky: Yes, How may I help you?")
+
+		for {
+			fmt.Print("You: ")
+			// Read the user input.
+			scanner.Scan()
+			userInput := scanner.Text()
+
+			if strings.ToLower(userInput) == "done" || strings.ToLower(userInput) == "exit" || strings.ToLower(userInput) == "quit" {
+				// Exit the loop if the user types 'done'.
+				break
+			}
+
+			// Append the user input to the conversation history.
+			conversation = append(conversation, openai.ChatCompletionMessage{
+				Role:    openai.ChatMessageRoleUser,
+				Content: userInput,
+			})
+
+			// Interact with the GPT API using the conversation history.
+			// Replace the following line with the actual API call and response.
+			gptResponse, err := chatGPT(apiKey, conversation, model)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+
+			// Append the GPT response to the conversation history.
+			conversation = append(conversation, openai.ChatCompletionMessage{
+				Role:    openai.ChatMessageRoleAssistant,
+				Content: gptResponse,
+			})
+
+			// Display the GPT response.
+			fmt.Println("Ducky: " + gptResponse)
+
+			// Attempt to extract code from the response
+			codeSnips := ExtractCodeSnippets(gptResponse)
+			// Check if there are any code snippets
+			if len(codeSnips) > 0 {
+				fmt.Println(DividerStr)
+				_ = printFormattedCodeSnippets(codeSnips)
+				fmt.Println(DividerStr)
+			}
+		}
 	},
 }
 
@@ -36,4 +103,23 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// chatCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	chatCmd.Flags().StringVarP(&model, "chat_model", "g", "gpt4", "Target model to chat with. Default is GPT4")
+}
+
+// chatGPT starts a new client to the OpenAI API and sends a query to the specified model.
+func chatGPT(apiKey string, conversation []openai.ChatCompletionMessage, model string) (string, error) {
+	client := openai.NewClient(apiKey)
+	resp, err := client.CreateChatCompletion(
+		context.Background(),
+		openai.ChatCompletionRequest{
+			Model:    model,
+			Messages: conversation,
+		},
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	return resp.Choices[0].Message.Content, nil
 }
