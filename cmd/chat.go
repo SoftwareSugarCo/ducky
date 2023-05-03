@@ -43,17 +43,38 @@ var chatCmd = &cobra.Command{
 			},
 		}
 
+		var multiLine bool
+		var messageLines []string
+
 		fmt.Println("Ducky: Yes, How may I help you?")
 
 		for {
-			fmt.Print("You: ")
+			if !multiLine {
+				fmt.Print("You: ")
+			}
 			// Read the user input.
 			scanner.Scan()
 			userInput := scanner.Text()
 
-			if strings.ToLower(userInput) == "done" || strings.ToLower(userInput) == "exit" || strings.ToLower(userInput) == "quit" {
+			if strings.ToLower(userInput) == "/done" || strings.ToLower(userInput) == "/exit" || strings.ToLower(userInput) == "/quit" || strings.ToLower(userInput) == "done" || strings.ToLower(userInput) == "exit" || strings.ToLower(userInput) == "quit" {
 				// Exit the loop if the user types 'done'.
 				break
+			}
+
+			if multiLine {
+				if strings.EqualFold(userInput, "/end") {
+					multiLine = false
+					userInput = strings.Join(messageLines, "\n")
+					messageLines = nil
+				} else {
+					messageLines = append(messageLines, userInput)
+					continue
+				}
+			}
+
+			if strings.EqualFold(userInput, "/multiline") || strings.EqualFold(userInput, "/ml") || strings.EqualFold(userInput, "/multi") || strings.EqualFold(userInput, "/m") {
+				multiLine = true
+				continue
 			}
 
 			// Append the user input to the conversation history.
