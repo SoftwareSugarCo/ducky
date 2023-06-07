@@ -32,7 +32,7 @@ func TestFormattingOutputWithCode(t *testing.T) {
 	resp := "Unfortunately, Go does not have a built-in do-while loop like some other programming languages. However, it is possible to simulate a do-while loop in Go using a for loop and a break statement.\n\nHere's an example of how to simulate a do-while loop in Go:\n\n```go\nfor {\n    // Code to be executed at least once\n\n    if condition {\n        // Code to be executed if condition is true\n\n        // Break out of the loop if necessary\n        break\n    }\n}\n```\n"
 	codeSnippets := ExtractCodeSnippets(resp)
 
-	err := printFormattedCodeSnippets(codeSnippets)
+	err := PrintFormattedCodeSnippets(codeSnippets)
 	if err != nil {
 		t.Errorf("Error printing formatted code snippets: %v", err)
 	}

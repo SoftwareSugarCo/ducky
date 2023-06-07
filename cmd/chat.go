@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"bufio"
+	"ducky/util"
 	"fmt"
 	"github.com/sashabaranov/go-openai"
 	"github.com/spf13/viper"
@@ -30,9 +31,13 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 		return
 	}
 
+	util.PrintDuckyHeader()
+
 	// Get the target model
 	model := GetModel(model)
-	fmt.Println("Using model: " + model)
+
+	printBox("SETTINGS", map[string]string{"Model": model, "Mode": "Chat"})
+	printBox("COMMANDS", map[string]string{"Exit": "/exit, /quit, /q, /done", "Multi-line": "/m, /ml, /multi, /multiline", "End multi-line": "/end"})
 
 	if ToFile {
 		fmt.Println("ToFile mode not yet implemented")
@@ -59,6 +64,7 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 	fmt.Println("Ducky: Yes, How may I help you?")
 
 	for {
+		fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 		if !multiLine {
 			fmt.Print("You: ")
 		}
@@ -133,7 +139,8 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 		})
 
 		// Display the GPT response.
-		fmt.Println("Ducky: " + gptResponse)
+		fmt.Printf("Ducky: %s\n\n", gptResponse)
+		fmt.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
 		// Attempt to extract code from the response
 		codeSnips := ExtractCodeSnippets(gptResponse)
@@ -144,6 +151,86 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 			fmt.Println(DIVSTR)
 		}
 	}
+}
+
+func printBox(label string, items map[string]string) {
+	var maxLength int
+
+	// Find the length of the longest setting key or value
+	for key, value := range items {
+		if len(key) > maxLength {
+			maxLength = len(key)
+		}
+
+		if len(value) > maxLength {
+			maxLength = len(value)
+		}
+	}
+
+	// Add two to the maxLength to account for the padding on either side of the value
+	maxLength += 2
+
+	// Print the box
+	fmt.Print("+")
+	for i := 0; i < (2*maxLength)+5; i++ {
+		fmt.Print("-")
+	}
+	fmt.Println("+")
+
+	// Print the label line
+	fmt.Printf("| %s%-*s |\n", label, ((2*maxLength)-len(label))+3, "")
+
+	// Print the separator line
+	fmt.Print("+")
+	for i := 0; i < (2*maxLength)+5; i++ {
+		fmt.Print("-")
+	}
+	fmt.Println("+")
+
+	// Print the items
+	for key, value := range items {
+		fmt.Printf("| %-*s | %-*s |\n", maxLength, key, maxLength, value)
+	}
+
+	// Print the bottom of the box
+	fmt.Print("+")
+	for i := 0; i < (2*maxLength)+5; i++ {
+		fmt.Print("-")
+	}
+	fmt.Println("+")
+
+	fmt.Printf("\n")
+}
+
+func printDucky() {
+	words := []string{
+		"    ____              _    ",
+		"   |  _ \\ _   _   ___| | __",
+		"   | | | | | | |/ ___| |/ /",
+		"   | |_| | |_| | (___|   < ",
+		"   |____/ \\____/\\____|_|\\_\\",
+	}
+
+	maxLength := len(words[0])
+	for _, word := range words[1:] {
+		if len(word) > maxLength {
+			maxLength = len(word)
+		}
+	}
+
+	for _, word := range words {
+		fmt.Println(word)
+	}
+
+	//frameWidth := maxLength + 4
+	//fmt.Println(strings.Repeat("#", frameWidth))
+	//for _, word := range words {
+	//	leftPadding := (maxLength - len(word)) / 2
+	//	rightPadding := maxLength - len(word) - leftPadding
+	//	fmt.Printf("# %s%s%s #\n", strings.Repeat(" ", leftPadding),
+	//		word, strings.Repeat(" ", rightPadding))
+	//}
+	//fmt.Println(strings.Repeat("#", frameWidth))
 }
 
 func init() {
