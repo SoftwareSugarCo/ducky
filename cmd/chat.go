@@ -37,7 +37,7 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 	model := GetModel(model)
 
 	util.PrintBox("SETTINGS", map[string]string{"Model": model, "Mode": "Chat"})
-	util.PrintBox("COMMANDS", map[string]string{"Exit": "/exit, /quit, /q, /done", "Multi-line": "/m, /ml, /multi, /multiline", "End multi-line": "/end"})
+	util.PrintBox("COMMANDS", map[string]string{"Exit": "/exit, /quit, /q, /done", "Multi-line": "/m, /ml, /multi, /multiline", "End multi-line": "/end", "Set Personality": "/whoami"})
 
 	if ToFile {
 		fmt.Println("ToFile mode not yet implemented")
