@@ -202,37 +202,6 @@ func printBox(label string, items map[string]string) {
 	fmt.Printf("\n")
 }
 
-func printDucky() {
-	words := []string{
-		"    ____              _    ",
-		"   |  _ \\ _   _   ___| | __",
-		"   | | | | | | |/ ___| |/ /",
-		"   | |_| | |_| | (___|   < ",
-		"   |____/ \\____/\\____|_|\\_\\",
-	}
-
-	maxLength := len(words[0])
-	for _, word := range words[1:] {
-		if len(word) > maxLength {
-			maxLength = len(word)
-		}
-	}
-
-	for _, word := range words {
-		fmt.Println(word)
-	}
-
-	//frameWidth := maxLength + 4
-	//fmt.Println(strings.Repeat("#", frameWidth))
-	//for _, word := range words {
-	//	leftPadding := (maxLength - len(word)) / 2
-	//	rightPadding := maxLength - len(word) - leftPadding
-	//	fmt.Printf("# %s%s%s #\n", strings.Repeat(" ", leftPadding),
-	//		word, strings.Repeat(" ", rightPadding))
-	//}
-	//fmt.Println(strings.Repeat("#", frameWidth))
-}
-
 func init() {
 	rootCmd.AddCommand(chatCmd)
 

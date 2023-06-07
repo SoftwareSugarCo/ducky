@@ -14,7 +14,10 @@ func TestCanGetResponse(t *testing.T) {
 	viper.SetEnvPrefix("ducky")
 	viper.AutomaticEnv()
 	apiKey := viper.GetString("DUCKY_API_KEY")
-	resp, err := queryChatGPT(apiKey, prompt, openai2.GPT3Dot5Turbo)
+	resp, err := SendToGPT(apiKey, openai2.GPT3Dot5Turbo, []openai2.ChatCompletionMessage{{
+		Role:    openai2.ChatMessageRoleUser,
+		Content: prompt,
+	}})
 
 	if err != nil {
 		t.Errorf("Error getting response from API: %v", err)
