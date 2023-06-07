@@ -36,8 +36,8 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 	// Get the target model
 	model := GetModel(model)
 
-	printBox("SETTINGS", map[string]string{"Model": model, "Mode": "Chat"})
-	printBox("COMMANDS", map[string]string{"Exit": "/exit, /quit, /q, /done", "Multi-line": "/m, /ml, /multi, /multiline", "End multi-line": "/end"})
+	util.PrintBox("SETTINGS", map[string]string{"Model": model, "Mode": "Chat"})
+	util.PrintBox("COMMANDS", map[string]string{"Exit": "/exit, /quit, /q, /done", "Multi-line": "/m, /ml, /multi, /multiline", "End multi-line": "/end"})
 
 	if ToFile {
 		fmt.Println("ToFile mode not yet implemented")
@@ -151,55 +151,6 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 			fmt.Println(DIVSTR)
 		}
 	}
-}
-
-func printBox(label string, items map[string]string) {
-	var maxLength int
-
-	// Find the length of the longest setting key or value
-	for key, value := range items {
-		if len(key) > maxLength {
-			maxLength = len(key)
-		}
-
-		if len(value) > maxLength {
-			maxLength = len(value)
-		}
-	}
-
-	// Add two to the maxLength to account for the padding on either side of the value
-	maxLength += 2
-
-	// Print the box
-	fmt.Print("+")
-	for i := 0; i < (2*maxLength)+5; i++ {
-		fmt.Print("-")
-	}
-	fmt.Println("+")
-
-	// Print the label line
-	fmt.Printf("| %s%-*s |\n", label, ((2*maxLength)-len(label))+3, "")
-
-	// Print the separator line
-	fmt.Print("+")
-	for i := 0; i < (2*maxLength)+5; i++ {
-		fmt.Print("-")
-	}
-	fmt.Println("+")
-
-	// Print the items
-	for key, value := range items {
-		fmt.Printf("| %-*s | %-*s |\n", maxLength, key, maxLength, value)
-	}
-
-	// Print the bottom of the box
-	fmt.Print("+")
-	for i := 0; i < (2*maxLength)+5; i++ {
-		fmt.Print("-")
-	}
-	fmt.Println("+")
-
-	fmt.Printf("\n")
 }
 
 func init() {

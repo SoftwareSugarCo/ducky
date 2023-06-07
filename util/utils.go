@@ -127,3 +127,52 @@ func PrintDuckyHeader() {
 
 	fmt.Println(string(selectedHeader))
 }
+
+func PrintBox(label string, items map[string]string) {
+	var maxLength int
+
+	// Find the length of the longest setting key or value
+	for key, value := range items {
+		if len(key) > maxLength {
+			maxLength = len(key)
+		}
+
+		if len(value) > maxLength {
+			maxLength = len(value)
+		}
+	}
+
+	// Add two to the maxLength to account for the padding on either side of the value
+	maxLength += 2
+
+	// Print the box
+	fmt.Print("+")
+	for i := 0; i < (2*maxLength)+5; i++ {
+		fmt.Print("-")
+	}
+	fmt.Println("+")
+
+	// Print the label line
+	fmt.Printf("| %s%-*s |\n", label, ((2*maxLength)-len(label))+3, "")
+
+	// Print the separator line
+	fmt.Print("+")
+	for i := 0; i < (2*maxLength)+5; i++ {
+		fmt.Print("-")
+	}
+	fmt.Println("+")
+
+	// Print the items
+	for key, value := range items {
+		fmt.Printf("| %-*s | %-*s |\n", maxLength, key, maxLength, value)
+	}
+
+	// Print the bottom of the box
+	fmt.Print("+")
+	for i := 0; i < (2*maxLength)+5; i++ {
+		fmt.Print("-")
+	}
+	fmt.Println("+")
+
+	fmt.Printf("\n")
+}
