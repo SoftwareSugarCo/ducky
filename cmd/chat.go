@@ -25,6 +25,8 @@ var chatCmd = &cobra.Command{
 }
 
 func handleChatCmd(cmd *cobra.Command, args []string) {
+	yellowPrint := color.New(color.FgYellow).PrintfFunc()
+	bluePrint := color.New(color.FgBlue).PrintfFunc()
 	// Get the api key
 	apiKey := viper.GetString("api_key")
 	if apiKey == "" {
@@ -63,12 +65,11 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 	)
 
 	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-	yellowPrint := color.New(color.FgYellow).PrintfFunc()
 	yellowPrint("Ducky: ")
 	fmt.Println("Yes, How may I help you?")
 	for {
 		if !multiLine {
-			fmt.Print("You: ")
+			bluePrint("You: ")
 		}
 		// Read the user input.
 		scanner.Scan()
@@ -78,7 +79,8 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 		switch strings.ToLower(userInput) {
 		case "/q", "/quit", "/exit", "/done": // Exit commands
 			stopChat = true
-			fmt.Println("Ducky: Goodbye!")
+			yellowPrint("\nDucky: ")
+			fmt.Println("Goodbye!")
 			break
 		case "/m", "/ml", "/multi", "/multiline": // Multiline commands
 			multiLine = true
@@ -141,7 +143,7 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 		})
 
 		// Display the GPT response.
-		yellowPrint("Ducky: ")
+		yellowPrint("\nDucky: ")
 		fmt.Printf("%s\n\n", gptResponse)
 		fmt.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 

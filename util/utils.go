@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"github.com/fatih/color"
 	"math/rand"
 )
 
@@ -125,7 +126,9 @@ func PrintDuckyHeader() {
 
 	selectedHeader := duckyHeaders[rand.Intn(len(duckyHeaders))]
 
-	fmt.Println(string(selectedHeader))
+	color.Yellow(string(selectedHeader))
+
+	//fmt.Println(string(selectedHeader))
 }
 
 func PrintBox(label string, items map[string]string) {
