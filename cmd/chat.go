@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"ducky/util"
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/sashabaranov/go-openai"
 	"github.com/spf13/viper"
 	"os"
@@ -62,7 +63,9 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 	)
 
 	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-	fmt.Println("Ducky: Yes, How may I help you?")
+	yellowPrint := color.New(color.FgYellow).PrintfFunc()
+	yellowPrint("Ducky: ")
+	fmt.Println("Yes, How may I help you?")
 	for {
 		if !multiLine {
 			fmt.Print("You: ")
@@ -138,7 +141,8 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 		})
 
 		// Display the GPT response.
-		fmt.Printf("Ducky: %s\n\n", gptResponse)
+		yellowPrint("Ducky: ")
+		fmt.Printf("%s\n\n", gptResponse)
 		fmt.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
 		// Attempt to extract code from the response
