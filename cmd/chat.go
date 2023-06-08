@@ -61,10 +61,9 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 		stopChat       bool
 	)
 
+	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 	fmt.Println("Ducky: Yes, How may I help you?")
-
 	for {
-		fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 		if !multiLine {
 			fmt.Print("You: ")
 		}
