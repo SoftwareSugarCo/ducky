@@ -25,7 +25,13 @@ var chatCmd = &cobra.Command{
 }
 
 func handleChatCmd(cmd *cobra.Command, args []string) {
-	yellowPrint := color.New(color.FgYellow).PrintfFunc()
+	hiYellowPrint := color.New(color.Bold, color.FgHiYellow).PrintfFunc()
+	yellowPrint := color.New(color.Bold, color.FgYellow).PrintfFunc()
+	yellowStr := color.New(color.FgHiYellow, color.Bold).SprintFunc()
+	redStr := color.New(color.FgHiRed).SprintFunc()
+	greenStr := color.New(color.FgHiGreen).SprintFunc()
+	cyanStr := color.New(color.Bold, color.FgHiCyan).SprintFunc()
+	hiBluePrint := color.New(color.Bold, color.FgHiBlue).PrintfFunc()
 	bluePrint := color.New(color.FgBlue).PrintfFunc()
 	// Get the api key
 	apiKey := viper.GetString("api_key")
@@ -34,12 +40,26 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 		return
 	}
 
+	var streamModeStr string
+	if StreamMode {
+		streamModeStr = greenStr(StreamMode)
+	} else {
+		streamModeStr = redStr(StreamMode)
+	}
+
+	var toFileStr string
+	if ToFile {
+		toFileStr = greenStr(ToFile)
+	} else {
+		toFileStr = redStr(ToFile)
+	}
+
 	util.PrintDuckyHeader()
 
 	// Get the target model
 	model := GetModel(model)
 
-	util.PrintBox("SETTINGS", map[string]string{"Model": model, "Mode": "Chat"})
+	util.PrintBox("SETTINGS", map[string]string{"Model": cyanStr(model), "Mode": yellowStr("Chat"), "Stream": streamModeStr, "ToFile": toFileStr})
 	util.PrintBox("COMMANDS", map[string]string{"Exit": "/exit, /quit, /q, /done", "Multi-line": "/m, /ml, /multi, /multiline", "End multi-line": "/end", "Set Personality": "/whoami"})
 
 	if ToFile {
@@ -65,11 +85,11 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 	)
 
 	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-	yellowPrint("Ducky: ")
-	fmt.Println("Yes, How may I help you?")
+	hiYellowPrint("Ducky: ")
+	yellowPrint("Yes, How may I help you?\n")
 	for {
 		if !multiLine {
-			bluePrint("You: ")
+			hiBluePrint("You: ")
 		}
 		// Read the user input.
 		scanner.Scan()
@@ -79,15 +99,15 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 		switch strings.ToLower(userInput) {
 		case "/q", "/quit", "/exit", "/done": // Exit commands
 			stopChat = true
-			yellowPrint("\nDucky: ")
-			fmt.Println("Goodbye!")
+			hiYellowPrint("\nDucky: ")
+			hiYellowPrint("Goodbye!\n")
 			break
 		case "/m", "/ml", "/multi", "/multiline": // Multiline commands
 			multiLine = true
 			continue
 		case "/whoami": // Set system personality command
 			setPersonality = true
-			fmt.Println("Who am I?")
+			yellowPrint("Who am I?\n")
 		}
 
 		// Break from the chat loop if user had send an exit command
@@ -118,7 +138,7 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 				Content: personality,
 			})
 
-			fmt.Println("That's who I'll be then...")
+			yellowPrint("That's who I'll be then...\n")
 			continue
 		}
 
@@ -128,12 +148,27 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 			Content: userInput,
 		})
 
-		// Interact with the GPT API using the conversation history.
-		// Replace the following line with the actual API call and response.
-		gptResponse, err := SendToGPT(apiKey, model, conversation)
-		if err != nil {
-			fmt.Println(err)
-			return
+		var (
+			gptResponse string
+			err         error
+		)
+		if StreamMode {
+			gptResponse, err = SendToGPTStreamResponse(apiKey, model, conversation)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		} else {
+			gptResponse, err = SendToGPT(apiKey, model, conversation)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+
+			// Display the GPT response.
+			hiYellowPrint("\nDucky: ")
+			yellowPrint("%s\n\n", gptResponse)
+			bluePrint("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n")
 		}
 
 		// Append the GPT response to the conversation history.
@@ -141,11 +176,6 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 			Role:    openai.ChatMessageRoleAssistant,
 			Content: gptResponse,
 		})
-
-		// Display the GPT response.
-		yellowPrint("\nDucky: ")
-		fmt.Printf("%s\n\n", gptResponse)
-		fmt.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
 		// Attempt to extract code from the response
 		codeSnips := ExtractCodeSnippets(gptResponse)
