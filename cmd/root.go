@@ -33,6 +33,8 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "ducky",
 	Short: "Ducky is a CLI tool to interact with OpenAI's ChatGPT",
+	Long: `Ducky is a CLI tool to interact with OpenAI's ChatGPT optimized for programming questions;
+	Ducky will extract the code snippet and format it in the interpreted language. `,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -51,8 +53,8 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ducky.yaml)")
-	rootCmd.PersistentFlags().BoolVarP(&ToFile, "to_file", "f", false, "Save each snippet to a file for the language extracted.")
-	rootCmd.PersistentFlags().BoolVarP(&StreamMode, "stream", "s", false, "Stream the output instead of returning it all at once.")
+	rootCmd.PersistentFlags().BoolVarP(&ToFile, "to_file", "f", false, "Save each snippet to a file with the language inferred from the snippet.")
+	rootCmd.PersistentFlags().BoolVarP(&StreamMode, "stream", "s", false, "Stream the output instead of returning it all at once... this is how chatGPT responds.")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
