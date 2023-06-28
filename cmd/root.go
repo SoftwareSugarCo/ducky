@@ -24,8 +24,9 @@ import (
 )
 
 var (
-	cfgFile string
-	ToFile  bool
+	cfgFile    string
+	ToFile     bool
+	StreamMode bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -53,6 +54,7 @@ func init() {
 	// will be global for your application.
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ducky.yaml)")
 	rootCmd.PersistentFlags().BoolVarP(&ToFile, "to_file", "f", false, "Save each snippet to a file for the language extracted.")
+	rootCmd.PersistentFlags().BoolVarP(&StreamMode, "stream", "s", false, "Stream the output instead of returning it all at once.")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

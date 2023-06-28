@@ -46,16 +46,14 @@ DDD:::::DDDDD:::::D UU:::::U     U:::::UU C:::::CCCCCCCC::::CK:::::::K   K::::::
 DDD:::::DDDDD:::::D  U:::::::UUU:::::::U  C:::::CCCCCCCC::::CK:::::::K   K::::::K       Y:::::Y       
 D:::::::::::::::DD    UU:::::::::::::UU    CC:::::::::::::::CK:::::::K    K:::::K    YYYY:::::YYYY    
 D::::::::::::DDD        UU:::::::::UU        CCC::::::::::::CK:::::::K    K:::::K    Y:::::::::::Y    
-DDDDDDDDDDDDD             UUUUUUUUU             CCCCCCCCCCCCCKKKKKKKKK    KKKKKKK    YYYYYYYYYYYYY  
-
+DDDDDDDDDDDDD             UUUUUUUUU             CCCCCCCCCCCCCKKKKKKKKK    KKKKKKK    YYYYYYYYYYYYY
 `)
 
 var duckyRec = []byte(`
  ____  _____ _____ _____ __ __ 
 |    \|  |  |     |  |  |  |  |
 |  |  |  |  |   --|    -|_   _|
-|____/|_____|_____|__|__| |_|  
-
+|____/|_____|_____|__|__| |_|
 `)
 
 var duckyBlood = []byte(`
@@ -68,15 +66,13 @@ var duckyBlood = []byte(`
  ░ ▒  ▒ ░░▒░ ░ ░   ░  ▒   ░ ░▒ ▒░ ▓██ ░▒░ 
  ░ ░  ░  ░░░ ░ ░ ░        ░ ░░ ░  ▒ ▒ ░░  
    ░       ░     ░ ░      ░  ░    ░ ░     
- ░               ░                ░ ░     
-
+ ░               ░                ░ ░
 `)
 
 var duckyCalvin = []byte(`
 ╔╦╗╦ ╦╔═╗╦╔═╦ ╦
  ║║║ ║║  ╠╩╗╚╦╝
-═╩╝╚═╝╚═╝╩ ╩ ╩ 
-
+═╩╝╚═╝╚═╝╩ ╩ ╩
 `)
 
 var duckyCorps = []byte(`
@@ -87,8 +83,7 @@ var duckyCorps = []byte(`
 ███    ███ ███    ███ ███        ▀▀█████▄    ▄██   ███ 
 ███    ███ ███    ███ ███    █▄    ███▐██▄   ███   ███ 
 ███   ▄███ ███    ███ ███    ███   ███ ▀███▄ ███   ███ 
-████████▀  ████████▀  ████████▀    ███   ▀█▀  ▀█████▀  
-
+████████▀  ████████▀  ████████▀    ███   ▀█▀  ▀█████▀
 `)
 
 var ducky3D = []byte(`
@@ -99,8 +94,7 @@ var ducky3D = []byte(`
 /**    /**/**    /**/**       /**/**     /**   
 /**    ** /**    /**//**    **/**//**    /**   
 /*******  //*******  //****** /** //**   /**   
-///////    ///////    //////  //   //    //   
-
+///////    ///////    //////  //   //    //
 `)
 
 var duckyAMC = []byte(`
@@ -110,8 +104,7 @@ var duckyAMC = []byte(`
 |       | |         | |           |..''         ''.''     
 |       | |         | |           |''..           |       
 |......'  '._______.'  '.______.' |    ''..       |
-
-	`)
+`)
 
 var duckyUSA = []byte(`
  :::====  :::  === :::===== :::  === ::: ===
@@ -122,11 +115,12 @@ var duckyUSA = []byte(`
 `)
 
 func PrintDuckyHeader() {
+	yellowStr := color.New(color.FgHiYellow, color.Bold).SprintFunc()
 	duckyHeaders := [][]byte{duckyBig, duckyBox, duckyLetters, duckyRec, duckyBlood, duckyCalvin, duckyCorps, ducky3D, duckyAMC, duckyUSA}
 
 	selectedHeader := duckyHeaders[rand.Intn(len(duckyHeaders))]
 
-	color.Yellow(string(selectedHeader))
+	fmt.Println(yellowStr(string(selectedHeader)))
 
 	//fmt.Println(string(selectedHeader))
 }
