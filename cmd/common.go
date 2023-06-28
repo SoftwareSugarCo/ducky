@@ -2,11 +2,14 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/alecthomas/chroma/formatters"
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/alecthomas/chroma/styles"
+	"github.com/fatih/color"
 	"github.com/sashabaranov/go-openai"
+	"io"
 	"os"
 	"regexp"
 	"strings"
@@ -108,4 +111,39 @@ func SendToGPT(apiKey, model string, prompts []openai.ChatCompletionMessage) (st
 	}
 
 	return resp.Choices[0].Message.Content, nil
+}
+
+func SendToGPTStreamResponse(apiKey, model string, prompts []openai.ChatCompletionMessage) (string, error) {
+	hiYellowPrint := color.New(color.Bold, color.FgHiYellow).PrintfFunc()
+	yellowPrint := color.New(color.FgYellow).PrintfFunc()
+	respBuilder := strings.Builder{}
+	gptClient := openai.NewClient(apiKey)
+	ctx := context.Background()
+	req := openai.ChatCompletionRequest{
+		Model:    model,
+		Messages: prompts,
+		Stream:   true,
+	}
+	stream, err := gptClient.CreateChatCompletionStream(ctx, req)
+	if err != nil {
+		return "", err
+	}
+	defer stream.Close()
+
+	hiYellowPrint("Ducky: ")
+	for {
+		res, err := stream.Recv()
+		if errors.Is(err, io.EOF) {
+			fmt.Printf("\n")
+			respBuilder.Write([]byte("\n"))
+			return respBuilder.String(), nil
+		}
+
+		if err != nil {
+			return "", err
+		}
+
+		respBuilder.Write([]byte(res.Choices[0].Delta.Content))
+		yellowPrint(res.Choices[0].Delta.Content)
+	}
 }
