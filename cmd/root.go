@@ -33,7 +33,7 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "ducky",
 	Short: "Ducky is a CLI tool to interact with OpenAI's ChatGPT",
-	Long: `Ducky is a CLI tool to interact with OpenAI's ChatGPT optimized for programming questions;
+	Long: `Ducky is a CLI tool to interact with OpenAI's ChatGPT. It is optimized for programming questions.
 	Ducky will extract the code snippet and format it in the interpreted language. `,
 }
 
