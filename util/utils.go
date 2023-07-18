@@ -114,6 +114,7 @@ var duckyUSA = []byte(`
  =======   ======   ======= ===  ===   ===  
 `)
 
+// PrintDuckyHeader will choose a random ducky header from the 'duckyHeaders' list and print it to the screen in yellow.
 func PrintDuckyHeader() {
 	yellowStr := color.New(color.FgHiYellow, color.Bold).SprintFunc()
 	duckyHeaders := [][]byte{duckyBig, duckyBox, duckyLetters, duckyRec, duckyBlood, duckyCalvin, duckyCorps, ducky3D, duckyAMC, duckyUSA}
@@ -125,6 +126,7 @@ func PrintDuckyHeader() {
 	//fmt.Println(string(selectedHeader))
 }
 
+// PrintBox will print an ASCII legend box with a label and all the items passed to the function.
 func PrintBox(label string, items map[string]string) {
 	var maxLength int
 

@@ -113,6 +113,7 @@ func SendToGPT(apiKey, model string, prompts []openai.ChatCompletionMessage) (st
 	return resp.Choices[0].Message.Content, nil
 }
 
+// SendToGPTStreamResponse returns the model response as a stream to simulate an active response rather than just returning a block of text at once.
 func SendToGPTStreamResponse(apiKey, model string, prompts []openai.ChatCompletionMessage) (string, error) {
 	hiYellowPrint := color.New(color.Bold, color.FgHiYellow).PrintfFunc()
 	yellowPrint := color.New(color.FgYellow).PrintfFunc()
