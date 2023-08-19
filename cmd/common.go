@@ -16,7 +16,7 @@ import (
 )
 
 // GetModel returns the exact model string for the model provided. If the model is unrecognized or not passed in,
-// the GPT4 model is selected by default.
+// the GPT3 model is selected by default.
 func GetModel(model string) string {
 	modelLower := strings.ToLower(model)
 
