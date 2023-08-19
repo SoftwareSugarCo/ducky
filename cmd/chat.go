@@ -8,12 +8,24 @@ import (
 	"github.com/sashabaranov/go-openai"
 	"github.com/spf13/viper"
 	"os"
+	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 )
 
-// chatCmd represents the chat command
+var (
+	hiYellowPrint = color.New(color.Bold, color.FgHiYellow).PrintfFunc()
+	yellowPrint   = color.New(color.Bold, color.FgYellow).PrintfFunc()
+	yellowStr     = color.New(color.FgHiYellow, color.Bold).SprintFunc()
+	redStr        = color.New(color.FgHiRed).SprintFunc()
+	greenStr      = color.New(color.FgHiGreen).SprintFunc()
+	cyanStr       = color.New(color.Bold, color.FgHiCyan).SprintFunc()
+	hiBluePrint   = color.New(color.Bold, color.FgHiBlue).PrintfFunc()
+	bluePrint     = color.New(color.FgBlue).PrintfFunc()
+)
+
 var chatCmd = &cobra.Command{
 	Use:   "chat",
 	Short: "Chat with the OpenAI API",
@@ -22,21 +34,14 @@ var chatCmd = &cobra.Command{
 }
 
 func handleChatCmd(cmd *cobra.Command, args []string) {
-	hiYellowPrint := color.New(color.Bold, color.FgHiYellow).PrintfFunc()
-	yellowPrint := color.New(color.Bold, color.FgYellow).PrintfFunc()
-	yellowStr := color.New(color.FgHiYellow, color.Bold).SprintFunc()
-	redStr := color.New(color.FgHiRed).SprintFunc()
-	greenStr := color.New(color.FgHiGreen).SprintFunc()
-	cyanStr := color.New(color.Bold, color.FgHiCyan).SprintFunc()
-	hiBluePrint := color.New(color.Bold, color.FgHiBlue).PrintfFunc()
-	bluePrint := color.New(color.FgBlue).PrintfFunc()
-	// Get the api key
+	// Get the api key from environment variable
 	apiKey := viper.GetString("api_key")
 	if apiKey == "" {
 		fmt.Println("No API key found. Please set the DUCKY_API_KEY environment variable or add it to your config file.")
 		return
 	}
 
+	// Determine if stream mode is to be enabled
 	var streamModeStr string
 	if StreamMode {
 		streamModeStr = greenStr(StreamMode)
@@ -44,6 +49,7 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 		streamModeStr = redStr(StreamMode)
 	}
 
+	// Determine if Code snippets should be exported to a file
 	var toFileStr string
 	if ToFile {
 		toFileStr = greenStr(ToFile)
@@ -51,11 +57,13 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 		toFileStr = redStr(ToFile)
 	}
 
+	// Print the DUCKY header
 	util.PrintDuckyHeader()
 
 	// Get the target model
 	model := GetModel(model)
 
+	// Print the configured settings
 	util.PrintBox("SETTINGS", map[string]string{"Model": cyanStr(model), "Mode": yellowStr("Chat"), "Stream": streamModeStr, "ToFile": toFileStr})
 	util.PrintBox("COMMANDS", map[string]string{"Exit": "/exit, /quit, /q, /done", "Multi-line": "/m, /ml, /multi, /multiline", "End multi-line": "/end", "Set Personality": "/whoami"})
 
@@ -66,20 +74,18 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 	// Initialize a scanner to read user input.
 	scanner := bufio.NewScanner(os.Stdin)
 
-	// Initialize a slice to store the conversation history.
-	var conversation = []openai.ChatCompletionMessage{
-		{
-			Role:    openai.ChatMessageRoleSystem,
-			Content: "You are an expert coding professor. You explain concepts in great detail with simple examples and simple explanations. When you provide code examples, you always document your code thoroughly for maximum understanding.",
-		},
-	}
-
+	// Chat setting variables
 	var (
 		multiLine      bool
 		setPersonality bool
 		messageLines   []string
 		stopChat       bool
 	)
+
+	var conversation []openai.ChatCompletionMessage
+
+	// Determine Ducky's role (personality)
+	getDuckySystemRole(conversation, scanner)
 
 	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 	hiYellowPrint("Ducky: ")
@@ -181,8 +187,68 @@ func handleChatCmd(cmd *cobra.Command, args []string) {
 			fmt.Println(TITLEDIVSTR)
 			_ = PrintFormattedCodeSnippets(codeSnips)
 			fmt.Println(DIVSTR)
+
+			if ToFile {
+				exportSnippetsToFile(userInput, codeSnips)
+			}
 		}
 	}
+}
+
+func exportSnippetsToFile(query string, snips map[string][]string) {
+	// TODO: Need another setting for output. Default will be to a Markdown file but other iterations could split by language type
+	// Check if a "ducky.md" file exists, if not create it
+	curDir, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Error getting current directory: ", err)
+		return
+	}
+	filePath := filepath.Join(curDir, "ducky.md")
+	f, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Println("Error opening file: ", err)
+	}
+	defer f.Close()
+
+	sb := strings.Builder{}
+	timeStamp := time.Now().Format("2006-01-02 15:04:05")
+	mdSectionHeader := fmt.Sprintf("## %s - Query\n\n", timeStamp)
+	sb.WriteString(mdSectionHeader)
+
+	sb.WriteString(query + "\n")
+
+	for lang, snip := range snips {
+		openingCodeBlock := fmt.Sprintf("```%s\n", lang)
+		sb.WriteString(openingCodeBlock)
+		snipStr := strings.Join(snip, "\n")
+		sb.WriteString(snipStr + "\n")
+		sb.WriteString("```\n\n")
+	}
+
+	_, err = f.WriteString(sb.String())
+	if err != nil {
+		fmt.Println("Error writing to file: ", err)
+		return
+	}
+	// Make sure we're always adding to file, never overwrite
+}
+
+// getDuckySystemRole requests the user to describe the system's role or defaults to a specific role
+func getDuckySystemRole(conv []openai.ChatCompletionMessage, scanner *bufio.Scanner) {
+	hiYellowPrint("Ducky: ")
+	yellowPrint("Who am I? My default role is of a coding professor but I can try to be anything you prefer.\n")
+	scanner.Scan()
+	duckyRole := scanner.Text()
+	if duckyRole == "" {
+		duckyRole = "You are an expert coding professor. You explain concepts in great detail with simple examples and simple explanations. When you provide code examples, you always document your code thoroughly for maximum understanding"
+	}
+	hiYellowPrint("Ducky: ")
+	yellowPrint("My role: '" + duckyRole + "'\n")
+
+	conv = append(conv, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleSystem,
+		Content: duckyRole,
+	})
 }
 
 func init() {
